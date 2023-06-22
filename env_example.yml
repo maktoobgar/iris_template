@@ -1,0 +1,14 @@
+# If you change debug to false, don't forget to 
+# add a database with it's name equal to "main"
+debug: true
+
+gateway:
+  ip: 0.0.0.0
+
+domain: "http://127.0.0.1:3000"
+
+secret_key: "update_me_please"
+# you can fill this value with `python3 auto.py generate` script
+
+# For more example see build/config/config.yaml config file
+# The structure for this config file is in internal/config/config.go

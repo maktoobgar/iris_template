@@ -20,9 +20,6 @@ func addMiddlewares(app *iris.Application) {
 	})
 	app.WrapRouter(c.ServeHTTP)
 
-	// Json
-	app.Use(middlewares.Json)
-
 	// Translator
 	app.Use(middlewares.Translator)
 

@@ -1,6 +1,7 @@
 package app
 
 import (
+	g "service/global"
 	"service/routes"
 
 	"github.com/kataras/iris/v12"
@@ -14,8 +15,9 @@ func API() {
 	app.Configure(iris.WithoutStartupLog)
 
 	// Router Settings
+	g.App = app
 	routes.HTTP(app)
 
 	// Run App
-	app.Listen(":8080")
+	app.Listen(g.CFG.Gateway.IP + ":" + g.CFG.Gateway.Port)
 }

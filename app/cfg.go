@@ -45,7 +45,7 @@ func initializeConfigs() {
 		log.Fatalln(err)
 	}
 
-	if err1, err2 := config.Parse("../env.yaml", cfg, false), config.Parse("../env.yml", cfg, false); err1 != nil || err2 != nil {
+	if err1, err2 := config.Parse(cfg.PWD+"/env.yaml", cfg, false), config.Parse(cfg.PWD+"/env.yml", cfg, false); err1 != nil || err2 != nil {
 		if err1 != nil {
 			log.Fatalln(err1)
 		} else if err2 != nil {

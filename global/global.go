@@ -5,6 +5,7 @@ import (
 
 	"service/config"
 
+	db "service/pkg/database"
 	"service/pkg/logging"
 	"service/pkg/translator"
 
@@ -38,3 +39,9 @@ var Translator translator.Translator = nil
 
 // App
 var App *iris.Application = nil
+
+// Default DB
+var DB db.RelationalDatabaseFunction = nil
+
+// Connections
+var AllSQLCons = map[string]db.RelationalDatabaseFunction{}

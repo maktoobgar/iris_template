@@ -1,21 +1,20 @@
 package app
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
 
-	g "service/global"
-
-	iconfig "service/config"
-
-	"service/pkg/config"
-	"service/pkg/logging"
-	"service/pkg/translator"
+	"golang.org/x/text/language"
 
 	"service/build"
-
-	"golang.org/x/text/language"
+	iconfig "service/config"
+	g "service/global"
+	"service/pkg/config"
+	db "service/pkg/database"
+	"service/pkg/logging"
+	"service/pkg/translator"
 )
 
 var (
@@ -65,6 +64,28 @@ func initialTranslator() {
 	g.Translator = t
 }
 
+// Run dbs
+func initialDBs() {
+	var err error
+	g.AllSQLCons, g.DB, err = db.New(cfg.Gateway.Databases, cfg.Debug)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var ok bool = false
+	if !g.CFG.Debug {
+		_, ok = g.AllSQLCons["main"]
+		if !ok {
+			log.Fatalln(errors.New("'main' db is not defined (required)"))
+		}
+	} else {
+		_, ok = g.AllSQLCons["test"]
+		if !ok {
+			log.Fatalln(errors.New("'test' db is not defined"))
+		}
+	}
+}
+
 // Logger initialization
 func initialLogger() {
 	cfg.Logging.Path += "/" + g.Name
@@ -81,6 +102,7 @@ func initialLogger() {
 func init() {
 	setPwd()
 	initializeConfigs()
+	initialDBs()
 	initialTranslator()
 	initialLogger()
 }

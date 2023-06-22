@@ -2,15 +2,18 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	migrate "github.com/rubenv/sql-migrate"
 	"golang.org/x/text/language"
 
 	"service/build"
 	iconfig "service/config"
 	g "service/global"
+	"service/pkg/colors"
 	"service/pkg/config"
 	db "service/pkg/database"
 	"service/pkg/logging"
@@ -64,6 +67,18 @@ func initialTranslator() {
 	g.Translator = t
 }
 
+// Logger initialization
+func initialLogger() {
+	cfg.Logging.Path += "/" + g.Name
+	k := cfg.Logging
+	opt := logging.Option(k)
+	l, err := logging.New(&opt, cfg.Debug)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	g.Logger = l
+}
+
 // Run dbs
 func initialDBs() {
 	var err error
@@ -86,16 +101,27 @@ func initialDBs() {
 	}
 }
 
-// Logger initialization
-func initialLogger() {
-	cfg.Logging.Path += "/" + g.Name
-	k := cfg.Logging
-	opt := logging.Option(k)
-	l, err := logging.New(&opt, cfg.Debug)
+func migrateLatestChanges() {
+	db, err := g.DB()
+	if err != nil {
+		panic(err)
+	}
+	mainOrTest := "test"
+	if !g.CFG.Debug {
+		mainOrTest = "main"
+	}
+	migrations := &migrate.FileMigrationSource{
+		Dir: fmt.Sprintf("migrations/%s/", mainOrTest),
+	}
+
+	n, err := migrate.Exec(db, g.CFG.Gateway.Databases[mainOrTest].Type, migrations, migrate.Up)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	g.Logger = l
+	if n > 0 {
+		fmt.Printf("\n%s==%sMigrations%s==%s\n\n", colors.Cyan, colors.Green, colors.Cyan, colors.Reset)
+		fmt.Printf("Applied %s%d%s migrations!\n", colors.Red, n, colors.Reset)
+	}
 }
 
 // Server initialization
@@ -103,6 +129,7 @@ func init() {
 	setPwd()
 	initializeConfigs()
 	initialDBs()
+	migrateLatestChanges()
 	initialTranslator()
 	initialLogger()
 }

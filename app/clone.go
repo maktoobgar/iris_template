@@ -32,7 +32,6 @@ func RunClonesAndServer(app *iris.Application) {
 		app.Listen(g.CFG.Gateway.IP+":"+g.CFG.Gateway.Port, iris.WithSocketSharding)
 		return
 	}
-	fmt.Println(os.Args[0])
 
 	type child struct {
 		pid int

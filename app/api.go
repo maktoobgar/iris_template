@@ -18,6 +18,5 @@ func API() {
 	g.App = app
 	routes.HTTP(app)
 
-	// Run App
-	app.Listen(g.CFG.Gateway.IP + ":" + g.CFG.Gateway.Port)
+	RunClonesAndServer(app)
 }

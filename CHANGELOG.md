@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: port address reuse feature added + logs updated to fit current scenario
 - 🎉 feat: best timeout middleware I'm ever developed
 - 🎉 feat: added auto migrations
 

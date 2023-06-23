@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	migrate "github.com/rubenv/sql-migrate"
 	"golang.org/x/text/language"
@@ -53,6 +54,10 @@ func initializeConfigs() {
 		} else if err2 != nil {
 			log.Fatalln(err2)
 		}
+	}
+
+	if cfg.ForksCount < 0 {
+		cfg.ForksCount = runtime.GOMAXPROCS(0)
 	}
 
 	g.CFG = cfg

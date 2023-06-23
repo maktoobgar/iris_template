@@ -206,17 +206,26 @@ func (l *LogBundle) Info(message string, r *http.Request, function any, params .
 	if len(params) > 0 {
 		param = params[0]
 	}
-	data := ""
-	if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
-		data = string(dataBytes)
-	}
-	logFields := logrus.Fields{
-		"package":  getPackageName(function),
-		"function": getFunctionName(function),
-		"url":      r.URL.Path,
-		"method":   r.Method,
-		"body":     data,
-		"params":   param,
+	var logFields logrus.Fields = nil
+	if r != nil {
+		data := ""
+		if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
+			data = string(dataBytes)
+		}
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"url":      r.URL.Path,
+			"method":   r.Method,
+			"body":     data,
+			"params":   param,
+		}
+	} else {
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"params":   param,
+		}
 	}
 	l.inf.WithFields(logFields).Info(message)
 	if l.debug {
@@ -232,17 +241,26 @@ func (l *LogBundle) Warning(message string, r *http.Request, function any, param
 	if len(params) > 0 {
 		param = params[0]
 	}
-	data := ""
-	if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
-		data = string(dataBytes)
-	}
-	logFields := logrus.Fields{
-		"package":  getPackageName(function),
-		"function": getFunctionName(function),
-		"url":      r.URL.Path,
-		"method":   r.Method,
-		"body":     data,
-		"params":   param,
+	var logFields logrus.Fields = nil
+	if r != nil {
+		data := ""
+		if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
+			data = string(dataBytes)
+		}
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"url":      r.URL.Path,
+			"method":   r.Method,
+			"body":     data,
+			"params":   param,
+		}
+	} else {
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"params":   param,
+		}
 	}
 	l.war.WithFields(logFields).Warning(message)
 	if l.debug {
@@ -258,17 +276,26 @@ func (l *LogBundle) Error(message string, r *http.Request, function any, params 
 	if len(params) > 0 {
 		param = params[0]
 	}
-	data := ""
-	if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
-		data = string(dataBytes)
-	}
-	logFields := logrus.Fields{
-		"package":  getPackageName(function),
-		"function": getFunctionName(function),
-		"url":      r.URL.Path,
-		"method":   r.Method,
-		"body":     data,
-		"params":   param,
+	var logFields logrus.Fields = nil
+	if r != nil {
+		data := ""
+		if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
+			data = string(dataBytes)
+		}
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"url":      r.URL.Path,
+			"method":   r.Method,
+			"body":     data,
+			"params":   param,
+		}
+	} else {
+		logFields = logrus.Fields{
+			"package":  getPackageName(function),
+			"function": getFunctionName(function),
+			"params":   param,
+		}
 	}
 	l.err.WithFields(logFields).Error(message)
 	if l.debug {
@@ -285,33 +312,23 @@ func (l *LogBundle) Panic(err any, r *http.Request, stack string, params ...map[
 	if len(params) > 0 {
 		param = params[0]
 	}
-	data := ""
-	if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
-		data = string(dataBytes)
-	}
-	logFields := logrus.Fields{
-		"url":    r.URL.Path,
-		"method": r.Method,
-		"body":   data,
-		"stack":  stack,
-		"params": param,
-	}
-	l.pan.WithFields(logFields).Error(message)
-	if l.debug {
-		fmt.Print(colors.Red + message + "\n" + stack + colors.Reset)
-	}
-}
-
-func (l *LogBundle) PanicMicroservice(err any, microservice string, stack string, params ...map[string]any) {
-	message := fmt.Sprintf("%v", err)
-	param := map[string]any{}
-	if len(params) > 0 {
-		param = params[0]
-	}
-	logFields := logrus.Fields{
-		"microservice": microservice,
-		"stack":        stack,
-		"params":       param,
+	var logFields logrus.Fields = nil
+	if r != nil {
+		data := ""
+		if dataBytes, errTemp := io.ReadAll(r.Body); errTemp == nil {
+			data = string(dataBytes)
+		}
+		logFields = logrus.Fields{
+			"url":    r.URL.Path,
+			"method": r.Method,
+			"body":   data,
+			"stack":  stack,
+			"params": param,
+		}
+	} else {
+		logFields = logrus.Fields{
+			"params": param,
+		}
 	}
 	l.pan.WithFields(logFields).Error(message)
 	if l.debug {

@@ -9,9 +9,14 @@ import (
 )
 
 func info() {
+	if IsChild() {
+		fmt.Println(colors.Cyan, fmt.Sprintf("==%sClone Number %s Started%s==%s", colors.Green, GetChildNumber(), colors.Cyan, colors.Reset))
+		return
+	}
 	fmt.Println(colors.Cyan, fmt.Sprintf("\n==%sSystem Info%s==%s\n", colors.Yellow, colors.Cyan, colors.Reset))
 	fmt.Printf("Name:\t\t\t%s%s%s\n", colors.Blue, g.Name, colors.Reset)
 	fmt.Printf("Version:\t\t%s%s%s\n", colors.Blue, g.Version, colors.Reset)
+	fmt.Printf("Forks:\t\t\t%s%d%s\n", colors.Blue, g.CFG.ForksCount, colors.Reset)
 	mainOrTest := "test"
 	mainOrTestColor := colors.Red + mainOrTest + colors.Reset
 	if !g.CFG.Debug {

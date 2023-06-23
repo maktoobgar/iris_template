@@ -1,9 +1,11 @@
 package handlers
 
-import "github.com/kataras/iris/v12"
+import (
+	"github.com/kataras/iris/v12"
+)
 
 func Hello(ctx iris.Context) {
-	ctx.JSON(map[string]string{
+	sendJson(ctx, map[string]string{
 		"msg": "Hello World 🥳",
 	})
 }

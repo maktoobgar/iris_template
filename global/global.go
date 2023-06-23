@@ -19,15 +19,16 @@ var Version string
 var Name string
 
 var (
-	Query               = "query"
-	UserKey             = "user"
-	TranslateKey        = "translate"
-	DeckId              = "deck_id"
-	Deck                = "deck"
-	Word                = "word"
-	WordId              = "word_id"
-	Type                = "type"
-	UuidRegex    string = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+	// Url
+	UserKey      = "user"
+	TranslateKey = "translate"
+
+	// Context
+	WriterLock   = "WriterLock"
+	ClosedWriter = "ClosedWriter"
+
+	// Regex
+	UuidRegex string = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
 )
 
 // Config

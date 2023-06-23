@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: best timeout middleware I'm ever developed
 - 🎉 feat: added auto migrations
 
 <!-- ## [0.0.2] - 2022-12-07

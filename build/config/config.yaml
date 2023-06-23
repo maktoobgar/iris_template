@@ -33,8 +33,8 @@ allow_headers: "Token"
 max_age: 3600
 # Timeout in seconds
 timeout: 2
-# Count of forks to run on the same address:port
-forks_count: -1
+# Count of clones to run on the same address:port
+clones_count: -1
 # At most 200 requests gets handled in server and
 # others wait for one of them to go out
 max_concurrent_requests: 200

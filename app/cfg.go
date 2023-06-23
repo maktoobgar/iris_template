@@ -56,8 +56,8 @@ func initializeConfigs() {
 		}
 	}
 
-	if cfg.ForksCount < 0 {
-		cfg.ForksCount = runtime.GOMAXPROCS(0)
+	if cfg.ClonesCount < 0 {
+		cfg.ClonesCount = runtime.GOMAXPROCS(0)
 	}
 
 	g.CFG = cfg

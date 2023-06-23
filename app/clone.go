@@ -39,14 +39,14 @@ func RunClonesAndServer(app *iris.Application) {
 	}
 
 	// create variables
-	max := runtime.GOMAXPROCS(g.CFG.ForksCount)
+	max := runtime.GOMAXPROCS(g.CFG.ClonesCount)
 
-	if g.CFG.ForksCount == 0 {
+	if g.CFG.ClonesCount == 0 {
 		max = 0
-	} else if g.CFG.ForksCount > max {
-		max = g.CFG.ForksCount
-	} else if g.CFG.ForksCount < max && g.CFG.ForksCount != -1 {
-		max = g.CFG.ForksCount
+	} else if g.CFG.ClonesCount > max {
+		max = g.CFG.ClonesCount
+	} else if g.CFG.ClonesCount < max && g.CFG.ClonesCount != -1 {
+		max = g.CFG.ClonesCount
 	}
 	childs := make(map[int]*exec.Cmd)
 	channel := make(chan child, max)
@@ -90,23 +90,15 @@ func RunClonesAndServer(app *iris.Application) {
 		}()
 	}
 
-	// Check for child process crashes
-	if max > 0 {
-		go func() {
-			for {
-				select {
-				case crashedProcess := <-channel:
-					g.Logger.Error(fmt.Sprintf("error: process with %d id crashed", crashedProcess.pid), nil, RunClonesAndServer)
-				case <-channelShutdownInfo:
-					return
-				}
-			}
-		}()
-	}
-
 	// Run App
 	if max > 0 {
-		app.Listen(g.CFG.Gateway.IP+":"+g.CFG.Gateway.Port, iris.WithSocketSharding)
+		// return error if child crashes
+		select {
+		case crashedProcess := <-channel:
+			g.Logger.Error(fmt.Sprintf("error: process with %d id crashed", crashedProcess.pid), nil, RunClonesAndServer)
+		case <-channelShutdownInfo:
+			return
+		}
 	} else {
 		app.Listen(g.CFG.Gateway.IP + ":" + g.CFG.Gateway.Port)
 	}

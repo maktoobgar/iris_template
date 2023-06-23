@@ -6,7 +6,7 @@ type (
 	Config struct {
 		Logging               Logging      `yaml:"logging"`
 		Gateway               Microservice `yaml:"gateway"`
-		ForksCount            int          `yaml:"forks_count"` // -1 => auto(forks_count will be equal to count of cors on the machine)
+		ClonesCount           int          `yaml:"clones_count"` // -1 => auto(clones_count will be equal to count of cors on the machine)
 		Debug                 bool         `yaml:"debug"`
 		Domain                string       `yaml:"domain"`
 		PWD                   string       `yaml:"pwd"`

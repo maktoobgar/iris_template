@@ -22,3 +22,7 @@ vendor
 # vscode
 
 .vscode
+
+# output
+api
+main

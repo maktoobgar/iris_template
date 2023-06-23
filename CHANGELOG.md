@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: all clone processes will terminate if one of them crash + main process doesn't serve and just watches
 - 🎉 feat: port address reuse feature added + logs updated to fit current scenario
 - 🎉 feat: best timeout middleware I'm ever developed
 - 🎉 feat: added auto migrations

@@ -43,6 +43,10 @@ func RunClonesAndServer(app *iris.Application) {
 
 	if g.CFG.ForksCount == 0 {
 		max = 0
+	} else if g.CFG.ForksCount > max {
+		max = g.CFG.ForksCount
+	} else if g.CFG.ForksCount < max && g.CFG.ForksCount != -1 {
+		max = g.CFG.ForksCount
 	}
 	childs := make(map[int]*exec.Cmd)
 	channel := make(chan child, max)

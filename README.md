@@ -17,5 +17,5 @@ go run main.go
 ## How to Build
 
 ```
-go build -o gateway main.go
+go build -o api main.go
 ```

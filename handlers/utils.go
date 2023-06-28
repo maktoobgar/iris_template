@@ -2,12 +2,13 @@ package handlers
 
 import (
 	g "service/global"
+	"service/pkg/errors"
 	"sync"
 
 	"github.com/kataras/iris/v12"
 )
 
-func sendJson(ctx iris.Context, v any, status ...int) {
+func SendJson(ctx iris.Context, v any, status ...int) {
 	code := 200
 	if len(status) > 0 {
 		code = status[0]
@@ -27,4 +28,8 @@ func sendJson(ctx iris.Context, v any, status ...int) {
 		closedWriter = true
 		ctx.Values().Set(g.ClosedWriter, closedWriter)
 	}
+}
+
+func Panic500(err error) {
+	panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
 }

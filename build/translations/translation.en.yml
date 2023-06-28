@@ -1,1 +1,6 @@
 TimeoutError: "request timed out"
+BodyNotProvidedProperly: "request is not filled properly"
+DbNotFound: "couldn't stablish a connection to database"
+InternalServerError: "an internal server error happened"
+PhoneIsUnique: "phone number already taken"
+EmailIsUnique: "email already taken"

@@ -1,1 +1,6 @@
 TimeoutError: "زمان انتظار برای به پایان رسیدن درخواست به اتمام رسید"
+BodyNotProvidedProperly: "فرم درخواست به درستی ارسال نشده است"
+DbNotFound: "اتصال به دیتابیس ناموفق بود"
+InternalServerError: "خطایی داخل سرور رخ داده است"
+PhoneIsUnique: "شماره تلفن در سامانه وجود دارد"
+EmailIsUnique: "ایمیل در سامانه وجود دارد"

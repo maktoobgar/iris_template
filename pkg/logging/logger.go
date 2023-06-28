@@ -332,6 +332,6 @@ func (l *LogBundle) Panic(err any, r *http.Request, stack string, params ...map[
 	}
 	l.pan.WithFields(logFields).Error(message)
 	if l.debug {
-		fmt.Print(colors.Red + message + "\n" + stack + colors.Reset)
+		fmt.Print(colors.Red + message + "\n" + colors.Red + stack + colors.Reset)
 	}
 }

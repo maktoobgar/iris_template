@@ -1,11 +1,22 @@
 package repositories
 
 import (
-	"errors"
+	"context"
+	"database/sql"
+	rawErrors "errors"
 	"fmt"
 	"reflect"
+	"service/pkg/errors"
 	"time"
+
+	"github.com/georgysavva/scany/v2/sqlscan"
 )
+
+type Query struct {
+	tableName string
+	row       any
+	query     string
+}
 
 func structCheck(data any) (reflect.Type, reflect.Value) {
 	dataType := reflect.TypeOf(data)
@@ -15,7 +26,7 @@ func structCheck(data any) (reflect.Type, reflect.Value) {
 		dataType = dataValue.Type()
 	}
 	if dataType.Kind() != reflect.Struct {
-		panic(errors.New("repositories: data is not struct"))
+		panic(rawErrors.New("repositories: data is not struct"))
 	}
 	return dataType, dataValue
 }
@@ -37,9 +48,9 @@ func formatValue(input any) string {
 	}
 }
 
-func InsertInto(table string, data any) string {
-	dataType, dataValue := structCheck(data)
-	query := fmt.Sprintf("INSERT INTO %s ", table)
+func (q *Query) InsertInto() *Query {
+	dataType, dataValue := structCheck(q.row)
+	query := fmt.Sprintf("INSERT INTO %s ", q.tableName)
 	keys := ""
 	values := ""
 	for _, f := range reflect.VisibleFields(dataType) {
@@ -61,11 +72,12 @@ func InsertInto(table string, data any) string {
 			}
 		}
 	}
-	return query + fmt.Sprintf("(%s) VALUES(%s);", keys, values)
+	q.query = query + fmt.Sprintf("(%s) VALUES(%s)", keys, values)
+	return q
 }
 
-func Select(table string, data any, keyValues map[string]any) string {
-	dataType, _ := structCheck(data)
+func (q *Query) Select(keyValues map[string]any) *Query {
+	dataType, _ := structCheck(q.row)
 	keys := ""
 	for _, f := range reflect.VisibleFields(dataType) {
 		if f.IsExported() {
@@ -88,10 +100,11 @@ func Select(table string, data any, keyValues map[string]any) string {
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	return fmt.Sprintf("SELECT DISTINCT %s FROM %s WHERE %s;", keys, table, wheres)
+	q.query = fmt.Sprintf("SELECT DISTINCT %s FROM %s WHERE %s", keys, q.tableName, wheres)
+	return q
 }
 
-func Delete(table string, keyValues map[string]any) string {
+func (q *Query) Delete(keyValues map[string]any) *Query {
 	wheres := ""
 	for key, value := range keyValues {
 		if wheres == "" {
@@ -100,11 +113,12 @@ func Delete(table string, keyValues map[string]any) string {
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	return fmt.Sprintf("DELETE FROM %s WHERE %s;", table, wheres)
+	q.query = fmt.Sprintf("DELETE FROM %s WHERE %s", q.tableName, wheres)
+	return q
 }
 
-func SelectCount(table string, keyValues map[string]any) string {
-	query := fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE", table)
+func (q *Query) SelectCount(keyValues map[string]any) *Query {
+	query := fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE", q.tableName)
 	wheres := ""
 	for key, value := range keyValues {
 		if wheres == "" {
@@ -113,12 +127,13 @@ func SelectCount(table string, keyValues map[string]any) string {
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	return fmt.Sprintf("%s %s;", query, wheres)
+	q.query = fmt.Sprintf("%s %s", query, wheres)
+	return q
 }
 
-func Update(table string, data any, keyValues map[string]any) string {
-	query := fmt.Sprintf("UPDATE %s SET ", table)
-	dataType, dataValue := structCheck(data)
+func (q *Query) Update(keyValues map[string]any) *Query {
+	query := fmt.Sprintf("UPDATE %s SET ", q.tableName)
+	dataType, dataValue := structCheck(q.row)
 	sets := ""
 	for _, f := range reflect.VisibleFields(dataType) {
 		if f.IsExported() {
@@ -145,12 +160,13 @@ func Update(table string, data any, keyValues map[string]any) string {
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	query += sets + " WHERE " + wheres + ";"
-	return query
+	query += sets + " WHERE " + wheres
+	q.query = query
+	return q
 }
 
-func UpdateSpecific(table string, updates map[string]any, keyValues map[string]any) string {
-	query := fmt.Sprintf("UPDATE %s SET ", table)
+func (q *Query) UpdateSpecific(updates map[string]any, keyValues map[string]any) *Query {
+	query := fmt.Sprintf("UPDATE %s SET ", q.tableName)
 	sets := ""
 	for key, value := range updates {
 		if sets == "" {
@@ -167,6 +183,95 @@ func UpdateSpecific(table string, updates map[string]any, keyValues map[string]a
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	query += sets + " WHERE " + wheres + ";"
-	return query
+	query += sets + " WHERE " + wheres
+	q.query = query
+	return q
+}
+
+func (q *Query) GetMe() *Query {
+	value := reflect.ValueOf(q.row)
+	id := value.Elem().FieldByName("Id").Interface()
+	q.query = fmt.Sprintf("SELECT * FROM %s WHERE id = %v", q.tableName, id)
+	return q
+}
+
+func (q *Query) RawQuery(input string) *Query {
+	q.query = input
+	return q
+}
+
+func (q *Query) Query() string {
+	output := ""
+	if len(q.query) == 0 {
+		output = ";"
+	} else if q.query[len(q.query)-1] != ';' {
+		output = q.query + ";"
+	} else {
+		output = q.query
+	}
+	q.query = ""
+	return output
+}
+
+func (q *Query) SetTableName(tableName string) {
+	q.tableName = tableName
+}
+
+func (q *Query) SetRowData(row any) {
+	q.row = row
+}
+
+// ExecContext executes a query without returning any rows.
+//
+// # Used for insert/delete/update operations
+//
+// # Returns the last inserted/deleted/updated id
+//
+// # Returns 0 if couldn't give that id
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) ExecContext(ctx context.Context, db *sql.DB) int64 {
+	query := q.Query()
+	result, err := db.ExecContext(ctx, query)
+	if err != nil {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
+	}
+
+	if rows, err := result.RowsAffected(); err == nil && rows > 0 {
+		if lastId, err := result.LastInsertId(); err == nil && lastId > 0 {
+			reflect.ValueOf(q.row).Elem().FieldByName("Id").Set(reflect.ValueOf(lastId))
+			return lastId
+		}
+	}
+	return 0
+}
+
+// QueryRowContext executes a query that is expected to return at most one row.
+//
+// # Used for SelectOneRow Operations
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) QueryRowContext(ctx context.Context, db *sql.DB) {
+	query := q.Query()
+	err := sqlscan.Get(ctx, db, q.row, query)
+	if err != nil {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
+	}
+}
+
+// QueryRowContext executes a query that is expected to return at most one row.
+//
+// # Used for SelectOneRow Operations
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) QueryRowContextError(ctx context.Context, db *sql.DB) error {
+	query := q.Query()
+	err := sqlscan.Get(ctx, db, q.row, query)
+	return err
+}
+
+func NewQuery(tableName string) Query {
+	return Query{
+		tableName: tableName,
+	}
 }

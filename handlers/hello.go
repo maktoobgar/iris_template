@@ -5,7 +5,7 @@ import (
 )
 
 func Hello(ctx iris.Context) {
-	sendJson(ctx, map[string]string{
+	SendJson(ctx, map[string]string{
 		"msg": "Hello World 🥳",
 	})
 }

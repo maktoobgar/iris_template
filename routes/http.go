@@ -1,9 +1,12 @@
 package routes
 
 import (
+	"service/dto"
 	g "service/global"
 	"service/handlers"
+	"service/handlers/auth_handlers"
 	"service/middlewares"
+	"service/middlewares/extra_middlewares"
 	"strings"
 	"time"
 
@@ -21,16 +24,19 @@ func addMiddlewares(app *iris.Application) {
 	app.WrapRouter(c.ServeHTTP)
 
 	// Translator
-	app.Use(middlewares.Translator)
+	app.Use(extra_middlewares.Translator)
 
 	// Panic
-	app.Use(middlewares.Panic)
+	app.Use(extra_middlewares.Panic)
 
 	// Timeout
-	app.Use(middlewares.Timeout(time.Second * time.Duration(g.CFG.Timeout)))
+	app.Use(extra_middlewares.Timeout(time.Second * time.Duration(g.CFG.Timeout)))
 
 	// RateLimiter
-	app.Use(middlewares.ConcurrentLimiter(200))
+	app.Use(extra_middlewares.ConcurrentLimiter(200))
+
+	// Creates a db for every db operation
+	app.Use(extra_middlewares.CreateDbInstance)
 
 	// Copression
 	app.Use(iris.Compression)
@@ -40,4 +46,10 @@ func HTTP(app *iris.Application) {
 	addMiddlewares(app)
 
 	app.Get("/", handlers.Hello)
+
+	// /api/auth
+	{
+		registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
+		app.Post("/api/auth/register", registerValidator, auth_handlers.Register)
+	}
 }

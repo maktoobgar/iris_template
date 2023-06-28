@@ -27,6 +27,9 @@ var (
 	WriterLock   = "WriterLock"
 	ClosedWriter = "ClosedWriter"
 
+	RequestBody = "RequestBody"
+	DbInstance  = "DbInstance"
+
 	// Regex
 	UuidRegex string = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
 )

@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"service/pkg/colors"
 	"strings"
 )
@@ -14,6 +15,8 @@ type (
 		message string
 		errMsg  string
 		errors  any
+
+		stack string
 	}
 )
 
@@ -77,6 +80,26 @@ func (e serverError) Error() string {
 	return message
 }
 
+func (e serverError) HasStackError() bool {
+	return e.stack != ""
+}
+
+func (e serverError) GetStack() string {
+	return e.stack
+}
+
+func (e serverError) GetErrorMessage() string {
+	return e.errMsg
+}
+
+func CastError(err error) *serverError {
+	if er, ok := err.(serverError); ok {
+		return &er
+	}
+
+	return nil
+}
+
 // Returns httpErrorCode, message and action of it
 func HttpError(err error) (code int, action int, message string, errMsg string, errors any) {
 	code = http.StatusInternalServerError
@@ -115,6 +138,7 @@ func New(code int64, action int64, message string, errMsg string, errors ...any)
 		errMsg:  errMsg,
 		message: message,
 		errors:  errs,
+		stack:   string(debug.Stack()),
 	}
 }
 

@@ -1,4 +1,4 @@
-package middlewares
+package extra_middlewares
 
 import (
 	"context"
@@ -17,7 +17,7 @@ func Timeout(timeout time.Duration) iris.Handler {
 		ch := make(chan any, 1)
 
 		// Call the next handler in a separate goroutine.
-		panicChan := make(chan any, 1)
+		panicChan := make(chan error, 1)
 		writerLock := &sync.Mutex{}
 		closedWriter := false
 		ctx.Values().Set(g.WriterLock, writerLock)
@@ -25,7 +25,15 @@ func Timeout(timeout time.Duration) iris.Handler {
 		go func() {
 			defer func() {
 				if p := recover(); p != nil {
-					panicChan <- p
+					finalErr := errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", "", nil)
+					if err, ok := p.(error); ok {
+						if errors.IsServerError(err) {
+							finalErr = err
+						} else {
+							finalErr = errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil)
+						}
+					}
+					panicChan <- finalErr
 				}
 			}()
 			ctx.Next()

@@ -1,4 +1,4 @@
-package middlewares
+package extra_middlewares
 
 import (
 	"log"
@@ -31,17 +31,35 @@ func Panic(ctx iris.Context) {
 		closedWriter := ctx.Values().Get(g.ClosedWriter).(bool)
 		if !closedWriter {
 			if err, ok := errInterface.(error); ok && errors.IsServerError(err) {
+				castedError := errors.CastError(err)
 				code, action, message, _, errors := errors.HttpError(err)
-				res := dto.PanicResponse{
-					Message: translate(message),
-					Code:    code,
-					Action:  action,
-					Errors:  errors,
+				if castedError.HasStackError() {
+					stack := castedError.GetStack()
+					if code == 500 {
+						g.Logger.Panic(errInterface, ctx.Request(), stack)
+					}
+					res := dto.PanicResponse{
+						Message: translate(message),
+						Code:    code,
+						Action:  action,
+						Errors:  errors,
+					}
+					if g.CFG.Debug {
+						log.Println(err)
+					}
+					ctx.StopWithJSON(res.Code, res)
+				} else {
+					res := dto.PanicResponse{
+						Message: translate(message),
+						Code:    code,
+						Action:  action,
+						Errors:  errors,
+					}
+					if g.CFG.Debug {
+						log.Println(err)
+					}
+					ctx.StopWithJSON(code, res)
 				}
-				if g.CFG.Debug {
-					log.Println(err)
-				}
-				ctx.StopWithJSON(code, res)
 			} else {
 				stack := string(debug.Stack())
 				g.Logger.Panic(errInterface, ctx.Request(), stack)

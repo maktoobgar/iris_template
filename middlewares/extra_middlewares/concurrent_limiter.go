@@ -1,4 +1,4 @@
-package middlewares
+package extra_middlewares
 
 import (
 	"github.com/kataras/iris/v12"

@@ -2,10 +2,14 @@
 
 ## [Unreleased]
 
+- 🎉 feat: register route added
 - 🎉 feat: added huge changes as
-1. migrations for users table
-2. Query builder added inside models
-3. added middlewares for different operations
+  1. migrations for users table
+  2. Query builder added inside models
+  3. added middlewares for different operations
+
+[1.0.0] - 2023-06-28
+
 - 🎉 feat: all clone processes will terminate if one of them crash + main process doesn't serve and just watches
 - 🎉 feat: port address reuse feature added + logs updated to fit current scenario
 - 🎉 feat: best timeout middleware I'm ever developed

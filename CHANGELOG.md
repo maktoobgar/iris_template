@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: added auth middleware + /api/me url
 - 🎉 feat: added login api route
 - 🎉 feat: register route added
 - 🎉 feat: added huge changes as

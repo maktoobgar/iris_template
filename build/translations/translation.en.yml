@@ -7,6 +7,7 @@ PhoneIsUnique: "phone number already taken"
 EmailIsUnique: "email already taken"
 UserWithPhoneNumberNotFound: "no user exist with provided phone number"
 PasswordOrPhoneNumberDoNotMatch: "phone number or provided password is wrong"
+LoginPlease: "please login first"
 
 # Messages
 Welcome: "welcome"

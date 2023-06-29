@@ -42,7 +42,7 @@ func (u *User) CreateAccessToken(ctx iris.Context, db *sql.DB) *Token {
 	}
 
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, _ := tkn.SignedString([]byte(g.CFG.SecretKey))
+	tokenString, _ := tkn.SignedString(g.SecretKeyBytes)
 	token := NewToken(tokenString, false, expirationTime, u.Id)
 	token.InsertInto().ExecContext(ctx, db)
 	token.Token = fmt.Sprintf("%d|%s", token.Id, token.Token)
@@ -62,7 +62,7 @@ func (u *User) CreateRefreshToken(ctx iris.Context, db *sql.DB) *Token {
 	}
 
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, _ := tkn.SignedString([]byte(g.CFG.SecretKey))
+	tokenString, _ := tkn.SignedString(g.SecretKeyBytes)
 	token := NewToken(tokenString, true, expirationTime, u.Id)
 	token.InsertInto().ExecContext(ctx, db)
 	token.Token = fmt.Sprintf("%d|%s", token.Id, token.Token)

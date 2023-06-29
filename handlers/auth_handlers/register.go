@@ -2,12 +2,13 @@ package auth_handlers
 
 import (
 	"database/sql"
+	"net/http"
 	"service/dto"
 	g "service/global"
-	"service/handlers"
 	"service/models"
 	"service/pkg/copier"
 	"service/pkg/translator"
+	"service/utils"
 
 	"github.com/kataras/iris/v12"
 )
@@ -26,7 +27,8 @@ func Register(ctx iris.Context) {
 	// Create User
 	user.InsertInto().ExecContext(ctx, db)
 	user.GetMe().QueryRowContext(ctx, db)
-	handlers.SendMessage(ctx, translate, "RegisterationFinishedSuccessfully", map[string]any{
+	ctx.StatusCode(http.StatusCreated)
+	utils.SendMessage(ctx, translate, "RegisterationFinishedSuccessfully", map[string]any{
 		"user": user,
 	})
 }

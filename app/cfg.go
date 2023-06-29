@@ -60,6 +60,7 @@ func initializeConfigs() {
 		cfg.ClonesCount = runtime.GOMAXPROCS(0)
 	}
 
+	g.SecretKeyBytes = []byte(cfg.SecretKey)
 	g.CFG = cfg
 }
 

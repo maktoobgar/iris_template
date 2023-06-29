@@ -19,8 +19,10 @@ var Version string
 var Name string
 
 var (
+	// Header
+	AccessToken = "Token"
+
 	// Url
-	UserKey      = "user"
 	TranslateKey = "translate"
 
 	// Context
@@ -29,6 +31,7 @@ var (
 
 	RequestBody = "RequestBody"
 	DbInstance  = "DbInstance"
+	UserKey     = "User"
 
 	// Regex
 	UuidRegex string = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
@@ -36,6 +39,9 @@ var (
 
 // Config
 var CFG *config.Config = nil
+
+// SecretKey in bytes
+var SecretKeyBytes []byte
 
 // Utilities
 var Logger logging.Logger = nil

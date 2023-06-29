@@ -7,6 +7,7 @@ PhoneIsUnique: "شماره تلفن در سامانه وجود دارد"
 EmailIsUnique: "ایمیل در سامانه وجود دارد"
 UserWithPhoneNumberNotFound: "کاربری با شماره ذکر شده در سامانه وجود ندارد"
 PasswordOrPhoneNumberDoNotMatch: "شماره ذکر شده یا پسوورد ورودی مطابقت ندارند"
+LoginPlease: "لطفا ابتدا وارد سامانه شوید"
 
 # Messages
 Welcome: "خوش آمدید"

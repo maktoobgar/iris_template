@@ -47,12 +47,15 @@ func HTTP(app *iris.Application) {
 
 	app.Get("/", handlers.Hello)
 
-	// /api/auth
-	{
-		registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
-		app.Post("/api/auth/register", registerValidator, auth_handlers.Register)
+	authParty := app.Party("/api/auth")
 
-		loginValidator := middlewares.Validate(dto.LoginRequestValidator, dto.LoginRequest{})
-		app.Post("/api/auth/login", loginValidator, auth_handlers.Login)
-	}
+	registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
+	authParty.Post("/register", registerValidator, auth_handlers.Register)
+
+	loginValidator := middlewares.Validate(dto.LoginRequestValidator, dto.LoginRequest{})
+	authParty.Post("/login", loginValidator, auth_handlers.Login)
+
+	apiParty := app.Party("/api", middlewares.Auth)
+
+	apiParty.Get("/me", handlers.Me)
 }

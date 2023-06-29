@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"service/dto"
 	g "service/global"
-	"service/handlers"
 	"service/models"
 	"service/pkg/copier"
 	"service/pkg/errors"
 	"service/pkg/translator"
+	"service/utils"
 
 	"github.com/georgysavva/scany/v2/sqlscan"
 	"github.com/kataras/iris/v12"
@@ -28,7 +28,7 @@ func Login(ctx iris.Context) {
 		if sqlscan.NotFound(err) {
 			panic(errors.New(errors.InvalidStatus, errors.ReSignIn, "UserWithPhoneNumberNotFound", err.Error()))
 		} else {
-			handlers.Panic500(err)
+			utils.Panic500(err)
 		}
 	}
 
@@ -39,7 +39,7 @@ func Login(ctx iris.Context) {
 	accessToken := user.CreateAccessToken(ctx, db)
 	refreshToken := user.CreateRefreshToken(ctx, db)
 
-	handlers.SendMessage(ctx, translate, "Welcome", map[string]any{
+	utils.SendMessage(ctx, translate, "Welcome", map[string]any{
 		"access_token":  accessToken.Token,
 		"refresh_token": refreshToken.Token,
 	})

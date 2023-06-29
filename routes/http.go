@@ -51,5 +51,8 @@ func HTTP(app *iris.Application) {
 	{
 		registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
 		app.Post("/api/auth/register", registerValidator, auth_handlers.Register)
+
+		loginValidator := middlewares.Validate(dto.LoginRequestValidator, dto.LoginRequest{})
+		app.Post("/api/auth/login", loginValidator, auth_handlers.Login)
 	}
 }

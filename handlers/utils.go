@@ -3,6 +3,7 @@ package handlers
 import (
 	g "service/global"
 	"service/pkg/errors"
+	"service/pkg/translator"
 	"sync"
 
 	"github.com/kataras/iris/v12"
@@ -32,4 +33,9 @@ func SendJson(ctx iris.Context, v any, status ...int) {
 
 func Panic500(err error) {
 	panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
+}
+
+func SendMessage(ctx iris.Context, translate translator.TranslatorFunc, message string, data map[string]any) {
+	data["message"] = translate(message)
+	ctx.JSON(data)
 }

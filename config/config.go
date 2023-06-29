@@ -16,6 +16,11 @@ type (
 		Timeout               int64        `yaml:"timeout"`
 		MaxConcurrentRequests int          `yaml:"max_concurrent_requests"`
 		SecretKey             string       `yaml:"secret_key"`
+
+		// Based on Days
+		AccessTokenLifePeriod int64 `yaml:"access_token_life_period"`
+		// Based on Months
+		RefreshTokenLifePeriod int64 `yaml:"refresh_token_life_period"`
 	}
 
 	Logging struct {

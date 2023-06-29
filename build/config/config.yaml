@@ -32,10 +32,14 @@ allow_headers: "Token"
 # cors - 3600 seconds (one hour)
 max_age: 3600
 # Timeout in seconds
-timeout: 2
+timeout: 10
 # Count of clones to run on the same address:port
 clones_count: -1
 # At most 200 requests gets handled in server and
 # others wait for one of them to go out
 max_concurrent_requests: 200
 secret_key: "update_me_please"
+# Based on Days
+access_token_life_period: 15
+# Based on Months
+refresh_token_life_period: 3

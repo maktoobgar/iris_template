@@ -14,20 +14,34 @@ import (
 
 var UserName = "users"
 
-type User struct {
+type UserInternal struct {
 	repositories.Query
 
 	Id          int64     `json:"id" db:"id" skipInsert:"+"`
-	PhoneNumber string    `json:"phone_number" db:"phone_number"`
-	Email       string    `json:"email" db:"email"`
-	Password    string    `json:"-" db:"password"`
-	FirstName   string    `json:"first_name" db:"first_name"`
-	LastName    string    `json:"last_name" db:"last_name"`
 	DisplayName string    `json:"display_name" db:"display_name"`
-	IsActive    bool      `json:"-" db:"is_active"`
-	IsAdmin     bool      `json:"-" db:"is_admin"`
-	IsSuperuser bool      `json:"-" db:"is_superuser"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at" skipUpdate:"+"`
+}
+
+func NewUserInternal() *UserInternal {
+	user := &UserInternal{
+		Query:     repositories.NewQuery(UserName),
+		CreatedAt: time.Now(),
+	}
+	user.SetRowData(user)
+	return user
+}
+
+type User struct {
+	UserInternal
+
+	PhoneNumber string `json:"phone_number" db:"phone_number"`
+	Email       string `json:"email" db:"email"`
+	Password    string `json:"-" db:"password"`
+	FirstName   string `json:"first_name" db:"first_name"`
+	LastName    string `json:"last_name" db:"last_name"`
+	IsActive    bool   `json:"-" db:"is_active"`
+	IsAdmin     bool   `json:"-" db:"is_admin"`
+	IsSuperuser bool   `json:"-" db:"is_superuser"`
 }
 
 func (u *User) CreateAccessToken(ctx iris.Context, db *sql.DB) *Token {
@@ -104,8 +118,10 @@ func (u *User) InformMeToQueryProvider() *User {
 
 func NewUser() *User {
 	user := &User{
-		Query:     repositories.NewQuery(UserName),
-		CreatedAt: time.Now(),
+		UserInternal: UserInternal{
+			Query:     repositories.NewQuery(UserName),
+			CreatedAt: time.Now(),
+		},
 	}
 	user.SetRowData(user)
 	return user

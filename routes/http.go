@@ -58,4 +58,6 @@ func HTTP(app *iris.Application) {
 	apiParty := app.Party("/api", middlewares.Auth)
 
 	apiParty.Get("/me", handlers.Me)
+
+	apiParty.Get("/users", handlers.Users)
 }

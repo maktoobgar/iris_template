@@ -8,6 +8,8 @@ EmailIsUnique: "ایمیل در سامانه وجود دارد"
 UserWithPhoneNumberNotFound: "کاربری با شماره ذکر شده در سامانه وجود ندارد"
 PasswordOrPhoneNumberDoNotMatch: "شماره ذکر شده یا پسوورد ورودی مطابقت ندارند"
 LoginPlease: "لطفا ابتدا وارد سامانه شوید"
+PageNotFound: "صفحه مورد نظر یافت نشد"
+InvalidPageParameters: "تمام پارامترهای ارسالی صفحه مورد نظر صحیح نمیباشد"
 
 # Messages
 Welcome: "خوش آمدید"

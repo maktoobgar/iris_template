@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: /api/users page with pagination added
 - 🎉 feat: added auth middleware + /api/me url
 - 🎉 feat: added login api route
 - 🎉 feat: register route added

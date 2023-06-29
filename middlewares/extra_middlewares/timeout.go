@@ -2,6 +2,7 @@ package extra_middlewares
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -25,7 +26,7 @@ func Timeout(timeout time.Duration) iris.Handler {
 		go func() {
 			defer func() {
 				if p := recover(); p != nil {
-					finalErr := errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", "", nil)
+					finalErr := errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", fmt.Sprint(p), nil)
 					if err, ok := p.(error); ok {
 						if errors.IsServerError(err) {
 							finalErr = err

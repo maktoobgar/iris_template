@@ -50,7 +50,6 @@ func formatValue(input any) string {
 
 func (q *Query) InsertInto() *Query {
 	dataType, dataValue := structCheck(q.row)
-	query := fmt.Sprintf("INSERT INTO %s ", q.tableName)
 	keys := ""
 	values := ""
 	for _, f := range reflect.VisibleFields(dataType) {
@@ -72,11 +71,11 @@ func (q *Query) InsertInto() *Query {
 			}
 		}
 	}
-	q.query = query + fmt.Sprintf("(%s) VALUES(%s)", keys, values)
+	q.query = fmt.Sprintf("INSERT INTO %s (%s) VALUES(%s)", q.tableName, keys, values)
 	return q
 }
 
-func (q *Query) Select(keyValues map[string]any) *Query {
+func (q *Query) Select(where map[string]any) *Query {
 	dataType, _ := structCheck(q.row)
 	keys := ""
 	for _, f := range reflect.VisibleFields(dataType) {
@@ -93,46 +92,80 @@ func (q *Query) Select(keyValues map[string]any) *Query {
 		}
 	}
 	wheres := ""
-	for key, value := range keyValues {
+	for key, value := range where {
 		if wheres == "" {
 			wheres = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	q.query = fmt.Sprintf("SELECT DISTINCT %s FROM %s WHERE %s", keys, q.tableName, wheres)
+	if wheres != "" {
+		q.query = fmt.Sprintf("SELECT DISTINCT %s FROM %s WHERE %s", keys, q.tableName, wheres)
+	} else {
+		q.query = fmt.Sprintf("SELECT DISTINCT %s FROM %s", keys, q.tableName)
+	}
 	return q
 }
 
-func (q *Query) Delete(keyValues map[string]any) *Query {
+func (q *Query) OrderBy(orderBy string, desc bool) *Query {
+	if q.query != "" {
+		if desc {
+			q.query += fmt.Sprintf(" ORDER BY %s DESC", orderBy)
+		} else {
+			q.query += fmt.Sprintf(" ORDER BY %s ASC", orderBy)
+		}
+	} else {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", "no query to add order by into it", nil))
+	}
+
+	return q
+}
+
+func (q *Query) Paginate(limit, whichPage int) *Query {
+	if q.query != "" {
+		q.query += fmt.Sprintf(" LIMIT %d OFFSET %d", limit, (whichPage-1)*limit)
+	} else {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", "no query to paginate", nil))
+	}
+
+	return q
+}
+
+func (q *Query) Delete(where map[string]any) *Query {
 	wheres := ""
-	for key, value := range keyValues {
+	for key, value := range where {
 		if wheres == "" {
 			wheres = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	q.query = fmt.Sprintf("DELETE FROM %s WHERE %s", q.tableName, wheres)
+	if wheres != "" {
+		q.query = fmt.Sprintf("DELETE FROM %s WHERE %s", q.tableName, wheres)
+	} else {
+		q.query = fmt.Sprintf("DELETE FROM %s", q.tableName)
+	}
 	return q
 }
 
-func (q *Query) SelectCount(keyValues map[string]any) *Query {
-	query := fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE", q.tableName)
+func (q *Query) SelectCount(where map[string]any) *Query {
 	wheres := ""
-	for key, value := range keyValues {
+	for key, value := range where {
 		if wheres == "" {
 			wheres = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	q.query = fmt.Sprintf("%s %s", query, wheres)
+	if wheres != "" {
+		q.query = fmt.Sprintf("SELECT COUNT(*) as count FROM %s WHERE %s", q.tableName, wheres)
+	} else {
+		q.query = fmt.Sprintf("SELECT COUNT(*) as count FROM %s", q.tableName)
+	}
 	return q
 }
 
-func (q *Query) Update(keyValues map[string]any) *Query {
-	query := fmt.Sprintf("UPDATE %s SET ", q.tableName)
+func (q *Query) Update(where map[string]any) *Query {
 	dataType, dataValue := structCheck(q.row)
 	sets := ""
 	for _, f := range reflect.VisibleFields(dataType) {
@@ -153,22 +186,24 @@ func (q *Query) Update(keyValues map[string]any) *Query {
 		}
 	}
 	wheres := ""
-	for key, value := range keyValues {
+	for key, value := range where {
 		if wheres == "" {
 			wheres = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	query += sets + " WHERE " + wheres
-	q.query = query
+	if wheres != "" {
+		q.query = fmt.Sprintf("UPDATE %s SET %s WHERE %s", q.tableName, sets, wheres)
+	} else {
+		q.query = fmt.Sprintf("UPDATE %s SET %s", q.tableName, sets)
+	}
 	return q
 }
 
-func (q *Query) UpdateSpecific(updates map[string]any, keyValues map[string]any) *Query {
-	query := fmt.Sprintf("UPDATE %s SET ", q.tableName)
+func (q *Query) UpdateSpecific(set map[string]any, where map[string]any) *Query {
 	sets := ""
-	for key, value := range updates {
+	for key, value := range set {
 		if sets == "" {
 			sets = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
@@ -176,15 +211,14 @@ func (q *Query) UpdateSpecific(updates map[string]any, keyValues map[string]any)
 		sets += fmt.Sprintf(", %s = %s", key, formatValue(value))
 	}
 	wheres := ""
-	for key, value := range keyValues {
+	for key, value := range where {
 		if wheres == "" {
 			wheres = fmt.Sprintf("%s = %s", key, formatValue(value))
 			continue
 		}
 		wheres += fmt.Sprintf(" AND %s = %s", key, formatValue(value))
 	}
-	query += sets + " WHERE " + wheres
-	q.query = query
+	q.query = fmt.Sprintf("UPDATE %s SET %s WHERE %s", q.tableName, sets, wheres)
 	return q
 }
 
@@ -246,7 +280,7 @@ func (q *Query) ExecContext(ctx context.Context, db *sql.DB) int64 {
 	return 0
 }
 
-// QueryRowContext executes a query that is expected to return at most one row.
+// QueryRowContext executes a query that is expected to return one row.
 //
 // # Used for SelectOneRow Operations
 //
@@ -259,7 +293,7 @@ func (q *Query) QueryRowContext(ctx context.Context, db *sql.DB) {
 	}
 }
 
-// QueryRowContext executes a query that is expected to return at most one row.
+// QueryRowContext executes a query that is expected to return one row.
 //
 // # Used for SelectOneRow Operations
 //
@@ -267,6 +301,45 @@ func (q *Query) QueryRowContext(ctx context.Context, db *sql.DB) {
 func (q *Query) QueryRowContextError(ctx context.Context, db *sql.DB) error {
 	query := q.Query()
 	err := sqlscan.Get(ctx, db, q.row, query)
+	return err
+}
+
+// QueryCountContext executes a query that is expected to return one row.
+//
+// # Used for SelectOneRow Operations
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) QueryCountContext(ctx context.Context, db *sql.DB) int64 {
+	query := q.Query()
+	count := int64(-1)
+	err := db.QueryRowContext(ctx, query).Scan(&count)
+	if err != nil {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
+	}
+	return count
+}
+
+// QueryContext executes a query that is expected to return multiple.
+//
+// # Used for SelectMultipleRows Operations
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) QueryContext(ctx context.Context, db *sql.DB, scanInto any) {
+	query := q.Query()
+	err := sqlscan.Select(ctx, db, scanInto, query)
+	if err != nil {
+		panic(errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil))
+	}
+}
+
+// QueryContextError executes a query that is expected to return multiple.
+//
+// # Used for SelectMultipleRows Operations
+//
+// Query which is recorded inside will get removed after execution of this method.
+func (q *Query) QueryContextError(ctx context.Context, db *sql.DB, scanInto any) error {
+	query := q.Query()
+	err := sqlscan.Select(ctx, db, scanInto, query)
 	return err
 }
 

@@ -1,0 +1,107 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "Iris Template",
+    "dateExported": "2023-07-21T10:38:11.397Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "a64afe36-f7eb-486e-b7ba-006de29bc32a",
+            "name": "Auth",
+            "containerId": "",
+            "created": "2023-06-29T08:21:55.238Z",
+            "sortNum": 10000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "45e5bb41-f4d9-43fe-8d2b-e042d31a8de7",
+            "colId": "ac010fc7-ecb7-41b9-a78d-c9879324c798",
+            "containerId": "a64afe36-f7eb-486e-b7ba-006de29bc32a",
+            "name": "Register",
+            "url": "http://127.0.0.1:6969/api/auth/register",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-06-28T08:14:04.870Z",
+            "modified": "2023-07-21T10:29:14.243Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"phone_number\": \"+989100000000\",\n  \"password\": \"123456789\",\n  \"display_name\": \"maktoobgar\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "27ace239-72c2-4ebd-b520-1b0eb038227a",
+            "colId": "ac010fc7-ecb7-41b9-a78d-c9879324c798",
+            "containerId": "",
+            "name": "Hello World",
+            "url": "http://127.0.0.1:6969",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-06-28T08:17:25.680Z",
+            "modified": "2023-06-28T08:17:36.168Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "0bf60814-22f4-44a9-9db7-a87f9909c4eb",
+            "colId": "ac010fc7-ecb7-41b9-a78d-c9879324c798",
+            "containerId": "a64afe36-f7eb-486e-b7ba-006de29bc32a",
+            "name": "Login",
+            "url": "http://127.0.0.1:6969/api/auth/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-06-29T08:21:32.955Z",
+            "modified": "2023-07-21T10:29:19.806Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"phone_number\": \"+989100000000\",\n  \"password\": \"123456789\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "acffce07-a9f2-45a5-aad8-07c1e763374b",
+            "colId": "ac010fc7-ecb7-41b9-a78d-c9879324c798",
+            "containerId": "",
+            "name": "Me",
+            "url": "http://127.0.0.1:6969/api/me",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2023-06-29T09:22:41.380Z",
+            "modified": "2023-07-21T10:29:41.094Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "5|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjMsIlR5cGUiOiIyIiwiZXhwIjoxNjkxMjMxMzcxfQ.Bq4V7IZJgdwAcy1g1Tnjiu1TuMGiogFSjugnal0lAG4"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "c8814e30-12f2-43a9-9d97-3059d4ce4b5a",
+            "colId": "ac010fc7-ecb7-41b9-a78d-c9879324c798",
+            "containerId": "",
+            "name": "Users",
+            "url": "http://127.0.0.1:6969/api/users",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2023-06-29T10:24:27.593Z",
+            "modified": "2023-07-21T10:36:53.451Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "5|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjMsIlR5cGUiOiIyIiwiZXhwIjoxNjkxMjMxMzcxfQ.Bq4V7IZJgdwAcy1g1Tnjiu1TuMGiogFSjugnal0lAG4"
+                }
+            ],
+            "params": [],
+            "tests": []
+        }
+    ]
+}

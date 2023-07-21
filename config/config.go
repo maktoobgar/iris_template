@@ -16,6 +16,7 @@ type (
 		Timeout               int64        `yaml:"timeout"`
 		MaxConcurrentRequests int          `yaml:"max_concurrent_requests"`
 		SecretKey             string       `yaml:"secret_key"`
+		Media                 string       `yaml:"media"`
 
 		// Based on Days
 		AccessTokenLifePeriod int64 `yaml:"access_token_life_period"`

@@ -9,6 +9,14 @@ import (
 	"service/pkg/colors"
 )
 
+func runCronJobs() {
+	// For Reference use:
+	// https://crontab.guru/every-minute
+	//
+	// Example:
+	// g.Cron.AddJob("* * * * *", some_function)
+}
+
 func info() {
 	if IsChild() {
 		fmt.Println(colors.Cyan, fmt.Sprintf("==%sClone Number %s Started%s==%s", colors.Green, GetChildNumber(), colors.Cyan, colors.Reset))

@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 🎉 feat: update this base with new changes
 ## 1.1.0 - 2023-06-29
 
 - 🎉 feat: /api/users page with pagination added

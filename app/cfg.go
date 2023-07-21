@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/robfig/cron/v3"
 	migrate "github.com/rubenv/sql-migrate"
 	"golang.org/x/text/language"
 
@@ -18,6 +19,7 @@ import (
 	"service/pkg/config"
 	db "service/pkg/database"
 	"service/pkg/logging"
+	media_manager "service/pkg/media"
 	"service/pkg/translator"
 )
 
@@ -61,6 +63,17 @@ func initializeConfigs() {
 	}
 
 	g.SecretKeyBytes = []byte(cfg.SecretKey)
+
+	mainOrTest := "test"
+	if !cfg.Debug {
+		mainOrTest = "main"
+	}
+	for name, database := range cfg.Gateway.Databases {
+		if name == mainOrTest {
+			g.MainDatabaseType = database.Type
+			break
+		}
+	}
 	g.CFG = cfg
 }
 
@@ -130,6 +143,16 @@ func migrateLatestChanges() {
 	}
 }
 
+func initialMedia() {
+	g.Media = media_manager.NewMediaManager(cfg.Media, true)
+	g.UsersMedia = g.Media.GoTo("users", true)
+}
+
+func initialCron() {
+	g.Cron = cron.New(cron.WithSeconds())
+	g.Cron.Start()
+}
+
 // Server initialization
 func init() {
 	setPwd()
@@ -138,4 +161,6 @@ func init() {
 	migrateLatestChanges()
 	initialTranslator()
 	initialLogger()
+	initialMedia()
+	initialCron()
 }

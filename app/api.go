@@ -18,5 +18,7 @@ func API() {
 	g.App = app
 	routes.HTTP(app)
 
+	runCronJobs()
+
 	RunClonesAndServer(app)
 }

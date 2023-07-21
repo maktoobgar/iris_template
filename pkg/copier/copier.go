@@ -24,6 +24,12 @@ func Copy(to, from any) {
 		if field.IsExported() {
 			fieldValue := toValue.FieldByName(field.Name)
 			fromFielValue := fromValue.FieldByName(field.Name)
+			for fromFielValue.Kind() == reflect.Ptr {
+				fromFielValue = fromFielValue.Elem()
+			}
+			for fieldValue.Kind() == reflect.Ptr {
+				fieldValue = fieldValue.Elem()
+			}
 			if fieldValue.IsValid() {
 				if fromFielValue.Type().String() == "time.Time" && fieldValue.Kind() == reflect.Int64 {
 					t := fromFielValue.Interface().(time.Time)

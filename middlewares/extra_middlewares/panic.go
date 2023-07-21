@@ -65,7 +65,6 @@ func Panic(ctx iris.Context) {
 				g.Logger.Panic(errInterface, ctx.Request(), stack)
 				res := dto.PanicResponse{
 					Message: translate("InternalServerError"),
-					Action:  int(errors.Report),
 					Code:    http.StatusInternalServerError,
 					Errors:  nil,
 				}

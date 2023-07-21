@@ -27,8 +27,8 @@ debug: true
 domain: ""
 # cors - allow_origins: "example.com, example.org"
 allow_origins: "*"
-# cors - allow_headers: "Token, Another"
-allow_headers: "Token"
+# cors - allow_headers: "Token, Another, ..."
+allow_headers: ""
 # cors - 3600 seconds (one hour)
 max_age: 3600
 # Timeout in seconds
@@ -39,6 +39,7 @@ clones_count: -1
 # others wait for one of them to go out
 max_concurrent_requests: 200
 secret_key: "update_me_please"
+media: "./media"
 # Based on Days
 access_token_life_period: 15
 # Based on Months

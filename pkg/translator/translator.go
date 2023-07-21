@@ -56,19 +56,23 @@ func New(fileSystem fs.FS, defaultLanguage language.Tag, languages ...language.T
 // You can get your language string code with using "golang.org/x/text/language"
 // library like: language.English.String()
 func (translator *TranslatorPack) TranslateFunction(language string, defaultLang string) TranslatorFunc {
-	localizer, err := translator.returnLocalizer(language[:2])
-	if err != nil {
-		localizer, err = translator.returnLocalizer(defaultLang)
+	if len(language) > 1 {
+		localizer, err := translator.returnLocalizer(language[:2])
 		if err != nil {
-			return func(word string) string { return word }
+			localizer, err = translator.returnLocalizer(defaultLang)
+			if err != nil {
+				return func(word string) string { return word }
+			}
+		}
+
+		return func(word string) string {
+			return translator.translateLocal(localizer, &i18n.LocalizeConfig{
+				MessageID: word,
+			})
 		}
 	}
 
-	return func(word string) string {
-		return translator.translateLocal(localizer, &i18n.LocalizeConfig{
-			MessageID: word,
-		})
-	}
+	return func(word string) string { return word }
 }
 
 // Used internally to initially load languages into the translator.

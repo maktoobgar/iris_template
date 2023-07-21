@@ -2,18 +2,22 @@
 # add a database with it's name equal to "main"
 debug: true
 
-# gateway:
-#   databases:
-#     main:
-#       type: "postgres"
-#       username: "postgres"
-#       password: "M123456789H"
-#       db_name: "project_db"
-#       host: "127.0.0.1"
-#       port: 5432
-#       ssl_mode: "disable"
-#       time_zone: "Asia/Tehran"
-#       charset: "utf8mb4"
+gateway:
+  databases:
+    test:
+      type: "sqlite3"
+      db_name: "test.db"
+    main:
+      type: "postgres"
+      username: "postgres"
+      password: "password"
+      db_name: "app_db"
+      host: "127.0.0.1"
+      port: 5432
+      ssl_mode: "disable"
+      time_zone: "UTC"
+      # time_zone: "Asia/Tehran"
+      charset: "utf8mb4"
 
 domain: "http://0.0.0.0:3000"
 

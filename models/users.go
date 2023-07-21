@@ -15,7 +15,7 @@ import (
 var UserName = "users"
 
 type UserInternal struct {
-	repositories.Query
+	repositories.QueryGenerator `json:"-"`
 
 	Id          int64     `json:"id" db:"id" skipInsert:"+"`
 	DisplayName string    `json:"display_name" db:"display_name"`
@@ -24,10 +24,11 @@ type UserInternal struct {
 
 func NewUserInternal() *UserInternal {
 	user := &UserInternal{
-		Query:     repositories.NewQuery(UserName),
-		CreatedAt: time.Now(),
+		QueryGenerator: repositories.NewQueryGenerator(UserName),
+		CreatedAt:      time.Now(),
 	}
 	user.SetRowData(user)
+	user.SetDbType(g.MainDatabaseType)
 	return user
 }
 
@@ -58,7 +59,9 @@ func (u *User) CreateAccessToken(ctx iris.Context, db *sql.DB) *Token {
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, _ := tkn.SignedString(g.SecretKeyBytes)
 	token := NewToken(tokenString, false, expirationTime, u.Id)
-	token.InsertInto().ExecContext(ctx, db)
+	if token.InsertInto().ExecQuery(ctx, db) == 0 {
+		token.Select(map[string]any{"token": token.Token, "user_id": u.Id}).ExecQueryRow(ctx, db)
+	}
 	token.Token = fmt.Sprintf("%d|%s", token.Id, token.Token)
 	token.User = u
 	return token
@@ -78,7 +81,9 @@ func (u *User) CreateRefreshToken(ctx iris.Context, db *sql.DB) *Token {
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, _ := tkn.SignedString(g.SecretKeyBytes)
 	token := NewToken(tokenString, true, expirationTime, u.Id)
-	token.InsertInto().ExecContext(ctx, db)
+	if token.InsertInto().ExecQuery(ctx, db) == 0 {
+		token.Select(map[string]any{"token": token.Token, "user_id": u.Id}).ExecQueryRow(ctx, db)
+	}
 	token.Token = fmt.Sprintf("%d|%s", token.Id, token.Token)
 	token.User = u
 	return token
@@ -111,18 +116,20 @@ func (u *User) IsPasswordEqualToMyHash(password string) bool {
 }
 
 func (u *User) InformMeToQueryProvider() *User {
-	u.SetTableName(UserName)
+	u.QueryGenerator = repositories.NewQueryGenerator(UserName)
 	u.SetRowData(u)
+	u.SetDbType(g.MainDatabaseType)
 	return u
 }
 
 func NewUser() *User {
 	user := &User{
 		UserInternal: UserInternal{
-			Query:     repositories.NewQuery(UserName),
-			CreatedAt: time.Now(),
+			QueryGenerator: repositories.NewQueryGenerator(UserName),
+			CreatedAt:      time.Now(),
 		},
 	}
 	user.SetRowData(user)
+	user.SetDbType(g.MainDatabaseType)
 	return user
 }

@@ -7,9 +7,11 @@ import (
 
 	db "service/pkg/database"
 	"service/pkg/logging"
+	media_manager "service/pkg/media"
 	"service/pkg/translator"
 
 	"github.com/kataras/iris/v12"
+	"github.com/robfig/cron/v3"
 )
 
 //go:embed version
@@ -20,7 +22,7 @@ var Name string
 
 var (
 	// Header
-	AccessToken = "Token"
+	AccessToken = "Authorization"
 
 	// Url
 	TranslateKey = "translate"
@@ -50,8 +52,19 @@ var Translator translator.Translator = nil
 // App
 var App *iris.Application = nil
 
+// Main database type goes here
+// Example: sqlite3 or postgres
+var MainDatabaseType = ""
+
 // Default DB
 var DB db.RelationalDatabaseFunction = nil
 
 // Connections
 var AllSQLCons = map[string]db.RelationalDatabaseFunction{}
+
+// Media manager for all medias
+var Media media_manager.MediaManager = nil
+var UsersMedia media_manager.MediaManager = nil
+
+// Cron of the project
+var Cron *cron.Cron = nil

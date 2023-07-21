@@ -2,19 +2,19 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"service/dto"
 	g "service/global"
 	"service/models"
-	"service/pkg/errors"
+	"service/pkg/translator"
 	"service/utils"
 
 	"github.com/kataras/iris/v12"
 )
 
 var (
-	defaultUsersParams = dto.UsersParams{
+	defaultUsersParams = dto.PaginationUsers{
 		OrderBy: "id",
+		Search:  "",
 		Sort:    "asc",
 		PerPage: 10,
 		Page:    1,
@@ -22,37 +22,36 @@ var (
 )
 
 func Users(ctx iris.Context) {
+	// Get required data from context
+	user := ctx.Values().Get(g.UserKey).(*models.User)
 	db := ctx.Values().Get(g.DbInstance).(*sql.DB)
-	userInternal := models.NewUserInternal()
+	translate := ctx.Values().Get(g.TranslateKey).(translator.TranslatorFunc)
 
-	orderBy := ctx.URLParamDefault("order_by", defaultUsersParams.OrderBy)
-	sort := ctx.URLParamDefault("sort", defaultUsersParams.Sort)
-	perPage := ctx.URLParamIntDefault("per_page", defaultUsersParams.PerPage)
-	page := ctx.URLParamIntDefault("page", defaultUsersParams.Page)
-	queryParams := &dto.UsersParams{
-		OrderBy: orderBy,
-		Sort:    sort,
-		PerPage: perPage,
-		Page:    page,
+	// Initialize params and validate them
+	params := &dto.PaginationUsers{
+		OrderBy: ctx.URLParamDefault("order_by", defaultUsersParams.OrderBy),
+		Search:  ctx.URLParamDefault("search", defaultUsersParams.Search),
+		Sort:    ctx.URLParamDefault("sort", defaultUsersParams.Sort),
+		PerPage: ctx.URLParamIntDefault("per_page", defaultUsersParams.PerPage),
+		Page:    ctx.URLParamIntDefault("page", defaultUsersParams.Page),
 	}
-	errs := dto.UsersParamsValidator.Validate(queryParams)
-	if errs != nil {
-		panic(errors.New(errors.InvalidStatus, errors.DoNothing, "InvalidPageParameters", "query parameters validation failed", errs))
+	utils.Validate(params, dto.PaginationUsersValidator, translate)
+
+	// Generate where search text
+	selectParams := map[string]string{
+		"display_name": params.Search,
+		"phone_number": params.Search,
+		"email":        params.Search,
+		"first_name":   params.Search,
+		"last_name":    params.Search,
 	}
+	wheres := user.GetLikeWheres(selectParams)
 
-	usersCount := userInternal.SelectCount(nil).QueryCountContext(ctx, db)
-	pagesCount := utils.CalculatePagesCount(usersCount, perPage)
-	if page > pagesCount {
-		panic(errors.New(errors.NotFoundStatus, errors.DoNothing, "PageNotFound", fmt.Sprintf("page %d requested but we have %d pages", page, pagesCount)))
-	}
+	// Get count of all users and all users in that spacific page
+	users := &[]*models.User{}
+	usersCount := user.SelectCount().ExecQueryCount(ctx, db)
+	user.SelectWhere(wheres).OrderBy(params.OrderBy, params.Sort).Paginate(params.PerPage, params.Page).ExecQueryMulti(ctx, db, users)
 
-	desc := false
-	if queryParams.Sort == "desc" {
-		desc = true
-	}
-
-	users := &[]*models.UserInternal{}
-	userInternal.Select(nil).OrderBy(orderBy, desc).Paginate(perPage, page).QueryContext(ctx, db, users)
-
-	utils.SendPage(ctx, usersCount, perPage, page, users)
+	// Create and send the page
+	utils.SendPage(ctx, usersCount, params.PerPage, params.Page, users)
 }

@@ -10,7 +10,7 @@ import (
 func CreateDbInstance(ctx iris.Context) {
 	db, err := g.DB()
 	if err != nil {
-		panic(errors.New(errors.ServiceUnavailable, errors.Resend, "DbNotFound", err.Error(), nil))
+		panic(errors.New(errors.ServiceUnavailable, "DbNotFound", err.Error(), nil))
 	}
 	defer db.Close()
 

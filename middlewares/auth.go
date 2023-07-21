@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"database/sql"
-	"fmt"
 	"regexp"
 	g "service/global"
 	"service/models"
@@ -24,7 +23,7 @@ func Auth(ctx iris.Context) {
 	// Check if a token has sent
 	tokenString := ctx.GetHeader(g.AccessToken)
 	if !tokenPattern.MatchString(tokenString) {
-		panic(errors.New(errors.UnauthorizedStatus, errors.ReSignIn, "LoginPlease", "sent token is not valid"))
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "sent token is not valid"))
 	}
 
 	// Get the actual token
@@ -38,14 +37,13 @@ func Auth(ctx iris.Context) {
 		return g.SecretKeyBytes, nil
 	})
 	if err != nil {
-		fmt.Println()
-		panic(errors.New(errors.UnauthorizedStatus, errors.ReSignIn, "LoginPlease", err.Error()))
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", err.Error()))
 	}
 	if !tkn.Valid {
-		panic(errors.New(errors.UnauthorizedStatus, errors.ReSignIn, "LoginPlease", "token is invalid"))
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "token is invalid"))
 	}
 	if claims.Type != models.AccessTokenType {
-		panic(errors.New(errors.UnauthorizedStatus, errors.ReSignIn, "LoginPlease", "token is not access token"))
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "token is not access token"))
 	}
 
 	// Check that token inside database too
@@ -53,19 +51,23 @@ func Auth(ctx iris.Context) {
 		Id: tokenId,
 	}
 	token.InformMeToQueryProvider()
-	err = token.GetMe().QueryRowContextError(ctx, db)
+	err = token.GetMe().ExecQueryRowErr(ctx, db)
 	if err != nil {
 		if sqlscan.NotFound(err) {
-			panic(errors.New(errors.UnauthorizedStatus, errors.ReSignIn, "LoginPlease", err.Error()))
+			panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", err.Error()))
 		} else {
 			utils.Panic500(err)
 		}
 	}
 
+	if token.Token != tokenString {
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "sent token id does not represent the same token"))
+	}
+
 	// Now that everything is fine, get user instance
 	user := models.NewUser()
 	user.Id = claims.UserId
-	user.GetMe().QueryRowContext(ctx, db)
+	user.GetMe().ExecQueryRow(ctx, db)
 	ctx.Values().Set(g.UserKey, user)
 
 	ctx.Next()

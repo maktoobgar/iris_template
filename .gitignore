@@ -26,3 +26,6 @@ vendor
 # output
 api
 /main
+
+# media folder
+/media

@@ -16,10 +16,14 @@ import (
 
 // Applies all necessary middlewares
 func addMiddlewares(app *iris.Application) {
+	// Copression
+	app.UseRouter(iris.Compression)
+
 	// Cors
 	c := cors.New(cors.Options{
-		AllowedOrigins: strings.Split(g.CFG.AllowOrigins, ","),
-		AllowedHeaders: strings.Split(g.CFG.AllowHeaders, ","),
+		AllowedOrigins:   strings.Split(g.CFG.AllowOrigins, ","),
+		AllowedHeaders:   strings.Split(g.CFG.AllowHeaders, ","),
+		AllowCredentials: true,
 	})
 	app.WrapRouter(c.ServeHTTP)
 
@@ -33,13 +37,10 @@ func addMiddlewares(app *iris.Application) {
 	app.Use(extra_middlewares.Timeout(time.Second * time.Duration(g.CFG.Timeout)))
 
 	// RateLimiter
-	app.Use(extra_middlewares.ConcurrentLimiter(200))
+	app.Use(extra_middlewares.ConcurrentLimiter(g.CFG.MaxConcurrentRequests))
 
 	// Creates a db for every db operation
 	app.Use(extra_middlewares.CreateDbInstance)
-
-	// Copression
-	app.Use(iris.Compression)
 }
 
 func HTTP(app *iris.Application) {
@@ -47,17 +48,21 @@ func HTTP(app *iris.Application) {
 
 	app.Get("/", handlers.Hello)
 
-	authParty := app.Party("/api/auth")
+	{ // /api/auth party
+		authParty := app.Party("/api/auth")
 
-	registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
-	authParty.Post("/register", registerValidator, auth_handlers.Register)
+		registerValidator := middlewares.Validate(dto.RegisterRequestValidator, dto.RegisterRequest{})
+		authParty.Post("/register", registerValidator, auth_handlers.Register)
 
-	loginValidator := middlewares.Validate(dto.LoginRequestValidator, dto.LoginRequest{})
-	authParty.Post("/login", loginValidator, auth_handlers.Login)
+		loginValidator := middlewares.Validate(dto.LoginRequestValidator, dto.LoginRequest{})
+		authParty.Post("/login", loginValidator, auth_handlers.Login)
+	}
 
-	apiParty := app.Party("/api", middlewares.Auth)
+	{ // /api party
+		apiParty := app.Party("/api", middlewares.Auth)
 
-	apiParty.Get("/me", handlers.Me)
+		apiParty.Get("/me", handlers.Me)
 
-	apiParty.Get("/users", handlers.Users)
+		apiParty.Get("/users", handlers.Users)
+	}
 }

@@ -25,8 +25,10 @@ func Register(ctx iris.Context) {
 	user.IsActive = true
 
 	// Create User
-	user.InsertInto().ExecContext(ctx, db)
-	user.GetMe().QueryRowContext(ctx, db)
+	user.InsertInto().ExecQuery(ctx, db)
+	user.Select(map[string]any{
+		"phone_number": req.PhoneNumber,
+	}).ExecQueryRow(ctx, db)
 	ctx.StatusCode(http.StatusCreated)
 	utils.SendMessage(ctx, translate, "RegisterationFinishedSuccessfully", map[string]any{
 		"user": user,

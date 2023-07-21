@@ -11,7 +11,6 @@ import (
 type (
 	serverError struct {
 		code    int64
-		action  int64
 		message string
 		errMsg  string
 		errors  any
@@ -38,21 +37,8 @@ const (
 	TimeoutStatus
 	// Service Unavailable 503
 	ServiceUnavailable
-)
-
-const (
-	// Do nothing
-	DoNothing int64 = iota
-	// SignIn in again
-	ReSignIn
-	// Report the problem
-	Report
-	// Correct sent data and request again
-	Resend
-	// Try later
-	TryLater
-	// Refresh your access token
-	RefreshToken
+	// TooManyRequests 429
+	TooManyRequests
 )
 
 var (
@@ -65,17 +51,18 @@ var (
 		ForbiddenStatus:        http.StatusForbidden,
 		TimeoutStatus:          http.StatusRequestTimeout,
 		ServiceUnavailable:     http.StatusServiceUnavailable,
+		TooManyRequests:        http.StatusTooManyRequests,
 	}
 )
 
 func (e serverError) Error() string {
 	errCode := httpErrors[e.code]
 	if errCode >= 500 {
-		return fmt.Sprintf("%sCode: %d - Action: %d - Message: %s - Error: %s%s", colors.Red, errCode, e.action, e.message, e.errMsg, colors.Reset)
+		return fmt.Sprintf("%sCode: %d - Message: %s - Error: %s%s", colors.Red, errCode, e.message, e.errMsg, colors.Reset)
 	}
-	message := fmt.Sprintf("%sCode: %d - Action: %d - Message: %s - Error: %s%s", colors.Orange, errCode, e.action, e.message, e.errMsg, colors.Reset)
+	message := fmt.Sprintf("%sCode: %d - Message: %s - Error: %s%s", colors.Orange, errCode, e.message, e.errMsg, colors.Reset)
 	if e.errMsg == "" {
-		message = fmt.Sprintf("%sCode: %d - Action: %d - Message: %s%s", colors.Green, errCode, e.action, e.message, colors.Reset)
+		message = fmt.Sprintf("%sCode: %d - Message: %s%s", colors.Green, errCode, e.message, colors.Reset)
 	}
 	return message
 }
@@ -103,14 +90,12 @@ func CastError(err error) *serverError {
 // Returns httpErrorCode, message and action of it
 func HttpError(err error) (code int, action int, message string, errMsg string, errors any) {
 	code = http.StatusInternalServerError
-	action = int(Report)
 	errMsg = err.Error()
 	message = errMsg
 	errors = nil
 
 	if er, ok := err.(serverError); ok {
 		code = httpErrors[er.code]
-		action = int(er.action)
 		errMsg = er.errMsg
 		message = er.message
 		errors = er.errors
@@ -127,14 +112,13 @@ func IsServerError(err error) bool {
 }
 
 // Creates a new error
-func New(code int64, action int64, message string, errMsg string, errors ...any) error {
+func New(code int64, message string, errMsg string, errors ...any) error {
 	var errs any = nil
 	if len(errors) != 0 {
 		errs = errors[0]
 	}
 	return serverError{
 		code:    code,
-		action:  action,
 		errMsg:  errMsg,
 		message: message,
 		errors:  errs,

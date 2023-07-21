@@ -23,17 +23,17 @@ func Login(ctx iris.Context) {
 
 	err := user.Select(map[string]any{
 		"phone_number": req.PhoneNumber,
-	}).QueryRowContextError(ctx, db)
+	}).ExecQueryRowErr(ctx, db)
 	if err != nil {
 		if sqlscan.NotFound(err) {
-			panic(errors.New(errors.InvalidStatus, errors.ReSignIn, "UserWithPhoneNumberNotFound", err.Error()))
+			panic(errors.New(errors.InvalidStatus, "UserWithPhoneNumberNotFound", err.Error()))
 		} else {
 			utils.Panic500(err)
 		}
 	}
 
 	if !user.IsPasswordEqualToMyHash(req.Password) {
-		panic(errors.New(errors.InvalidStatus, errors.ReSignIn, "PasswordOrPhoneNumberDoNotMatch", "password didn't match"))
+		panic(errors.New(errors.InvalidStatus, "PasswordOrPhoneNumberDoNotMatch", "password didn't match"))
 	}
 
 	accessToken := user.CreateAccessToken(ctx, db)

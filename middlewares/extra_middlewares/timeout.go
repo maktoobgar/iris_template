@@ -26,12 +26,12 @@ func Timeout(timeout time.Duration) iris.Handler {
 		go func() {
 			defer func() {
 				if p := recover(); p != nil {
-					finalErr := errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", fmt.Sprint(p), nil)
+					finalErr := errors.New(errors.UnexpectedStatus, "InternalServerError", fmt.Sprint(p), nil)
 					if err, ok := p.(error); ok {
 						if errors.IsServerError(err) {
 							finalErr = err
 						} else {
-							finalErr = errors.New(errors.UnexpectedStatus, errors.Resend, "InternalServerError", err.Error(), nil)
+							finalErr = errors.New(errors.UnexpectedStatus, "InternalServerError", err.Error(), nil)
 						}
 					}
 					panicChan <- finalErr
@@ -53,7 +53,7 @@ func Timeout(timeout time.Duration) iris.Handler {
 			// Handler completed successfully, do nothing.
 		case <-newCtx.Done():
 			// Handler timed out, return an error response.
-			panic(errors.New(errors.ServiceUnavailable, errors.Resend, "TimeoutError", ""))
+			panic(errors.New(errors.ServiceUnavailable, "TimeoutError", ""))
 		}
 	}
 }

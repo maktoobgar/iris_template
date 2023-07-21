@@ -22,16 +22,16 @@ func Validate(validator galidator.Validator, inputInstance any) iris.Handler {
 		err2 := json.Unmarshal(bytes, req)
 
 		if err1 != nil {
-			panic(errors.New(errors.InvalidStatus, errors.Resend, "BodyNotProvidedProperly", err1.Error()))
+			panic(errors.New(errors.InvalidStatus, "BodyNotProvidedProperly", err1.Error()))
 		} else if err2 != nil {
-			panic(errors.New(errors.InvalidStatus, errors.Resend, "BodyNotProvidedProperly", err2.Error()))
+			panic(errors.New(errors.InvalidStatus, "BodyNotProvidedProperly", err2.Error()))
 		}
 
 		// Validate and translate error messages if errors exist
 		translate := ctx.Value(g.TranslateKey).(translator.TranslatorFunc)
 		errs := validator.Validate(req, galidator.Translator(translate))
 		if errs != nil {
-			panic(errors.New(errors.InvalidStatus, errors.Resend, "BodyNotProvidedProperly", "", errs))
+			panic(errors.New(errors.InvalidStatus, "BodyNotProvidedProperly", "", errs))
 		}
 
 		// If we come this far, data is valid, so record it in context

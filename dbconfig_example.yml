@@ -16,8 +16,10 @@ mssql:
   dir: migrations/mssql
   table: gorp_migrations
 
-postgres:
+main:
   dialect: postgres
-  datasource: host=${POSTGRES_HOST} port=${POSTGRES_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${DATABASE_NAME} sslmode=disabled
-  dir: migrations/postgres
+  datasource: host=${POSTGRES_HOST} port=${POSTGRES_PORT} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${DATABASE_NAME} sslmode=disable
+  dir: migrations/main
   table: gorp_migrations
+
+# sh -c "export POSTGRES_HOST='127.0.0.1' && export POSTGRES_PORT='5432' && export POSTGRES_USER='postgres' && export POSTGRES_PASSWORD='password' && export DATABASE_NAME='agents' && sql-migrate down -env=main"

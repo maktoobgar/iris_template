@@ -9,8 +9,9 @@ import (
 func Translator(ctx iris.Context) {
 	lang := ctx.GetHeader("Accept-Language")
 	if lang == "" {
-		lang = "en"
+		lang = ctx.GetCookie("Accept-Language")
 	}
+
 	ctx.Values().Set(g.TranslateKey, g.Translator.TranslateFunction(lang, "en"))
 	ctx.Next()
 }

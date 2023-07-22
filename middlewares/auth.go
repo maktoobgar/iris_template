@@ -9,6 +9,7 @@ import (
 	"service/utils"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/georgysavva/scany/v2/sqlscan"
@@ -22,6 +23,9 @@ func Auth(ctx iris.Context) {
 
 	// Check if a token has sent
 	tokenString := ctx.GetHeader(g.AccessToken)
+	if tokenString == "" {
+		tokenString = ctx.GetCookie(g.AccessToken)
+	}
 	if !tokenPattern.MatchString(tokenString) {
 		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "sent token is not valid"))
 	}
@@ -45,10 +49,14 @@ func Auth(ctx iris.Context) {
 	if claims.Type != models.AccessTokenType {
 		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "token is not access token"))
 	}
+	if claims.ExpiresAt < time.Now().Unix() {
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "token is expired"))
+	}
 
 	// Check that token inside database too
-	token := models.Token{
-		Id: tokenId,
+	token := &models.Token{
+		Id:    tokenId,
+		Token: tokenString,
 	}
 	token.InformMeToQueryProvider()
 	err = token.GetMe().ExecQueryRowErr(ctx, db)
@@ -59,16 +67,18 @@ func Auth(ctx iris.Context) {
 			utils.Panic500(err)
 		}
 	}
-
 	if token.Token != tokenString {
-		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", "sent token id does not represent the same token"))
+		panic(errors.New(errors.UnauthorizedStatus, "LoginPlease", err.Error()))
 	}
 
 	// Now that everything is fine, get user instance
 	user := models.NewUser()
 	user.Id = claims.UserId
 	user.GetMe().ExecQueryRow(ctx, db)
+
+	// Set user instance and token into context
 	ctx.Values().Set(g.UserKey, user)
+	ctx.Values().Set(g.AccessToken, token)
 
 	ctx.Next()
 }
